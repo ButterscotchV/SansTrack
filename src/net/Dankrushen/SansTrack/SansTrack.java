@@ -35,7 +35,7 @@ import java.awt.Toolkit;
 
 public class SansTrack implements NativeMouseInputListener, WindowListener, NativeKeyListener {
 
-	private JFrame frame;
+	private JFrame frmSansTracker;
 	private JLabel lblEaten;
 	private JLabel lblDelay;
 	private JLabel menu;
@@ -73,7 +73,9 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 	private int attack = 0;
 
 	private boolean me = false;
-
+	private int setSpots = 0;
+	private int[] spots = new int[] {705, 763, 876, 756, 1077, 757, 1176, 757};
+	
 	private int fontSize = 35;
 	private int DebugMode = 1;
 	/* DebugMode options
@@ -81,6 +83,7 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 	 * 1: Shows keys pressed
 	 * 2: Shows colour checking info
 	 * 3: Shows position fixing info
+	 * 4: Shows spot setting info
 	 */
 
 	/**
@@ -92,7 +95,7 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 				try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
 				try {
 					SansTrack window = new SansTrack();
-					window.frame.setVisible(true);
+					window.frmSansTracker.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -112,15 +115,16 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setResizable(false);
-		frame.addWindowListener(this);
-		frame.setBounds(100, 100, 650, 446);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
+		frmSansTracker = new JFrame();
+		frmSansTracker.setTitle("Sans Tracker");
+		frmSansTracker.setResizable(false);
+		frmSansTracker.addWindowListener(this);
+		frmSansTracker.setBounds(100, 100, 650, 446);
+		frmSansTracker.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmSansTracker.setLocationRelativeTo(null);
 
 		JPanel panel = new JPanel();
-		frame.getContentPane().add(panel, BorderLayout.NORTH);
+		frmSansTracker.getContentPane().add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
 
 		Font f = new Font("Tahoma", Font.PLAIN, fontSize);
@@ -137,11 +141,11 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 
 		menu = new JLabel("");
 		menu.setHorizontalAlignment(SwingConstants.CENTER);
-		frame.getContentPane().add(menu, BorderLayout.CENTER);
+		frmSansTracker.getContentPane().add(menu, BorderLayout.CENTER);
 		menu.setIcon(new ImageIcon(SansTrack.class.getResource("/Menu/0.png")));
 
 		panel_1 = new JPanel();
-		frame.getContentPane().add(panel_1, BorderLayout.SOUTH);
+		frmSansTracker.getContentPane().add(panel_1, BorderLayout.SOUTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
 
 		label = new JLabel("Next Attack:");
@@ -198,7 +202,36 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 	}
 
 	@Override
-	public void nativeMouseClicked(NativeMouseEvent arg0) { /* Unimplemented */ }
+	public void nativeMouseClicked(NativeMouseEvent arg0) {
+		if(setSpots > 0) {
+			if(setSpots == 1) {
+				setSpots++;
+				spots = new int[8];
+				spots[0] = arg0.getX();
+				spots[1] = arg0.getY();
+				if(DebugMode == 4) System.out.println("Set spot 1!");
+			} else if(setSpots == 2) {
+				setSpots++;
+				spots = new int[8];
+				spots[2] = arg0.getX();
+				spots[3] = arg0.getY();
+				if(DebugMode == 4) System.out.println("Set spot 2!");
+			} else if(setSpots == 3) {
+				setSpots++;
+				spots = new int[8];
+				spots[4] = arg0.getX();
+				spots[5] = arg0.getY();
+				if(DebugMode == 4) System.out.println("Set spot 3!");
+			} else if(setSpots == 4) {
+				spots = new int[8];
+				spots[6] = arg0.getX();
+				spots[7] = arg0.getY();
+				setSpots = 0;
+				if(DebugMode == 4) System.out.println("Set spot 4!");
+				if(DebugMode == 4 || DebugMode == 1) System.out.println("Finished spot setting!");
+			}
+		}
+	}
 
 	public int getKeyCode(char c) {
 		final char c2 = String.valueOf(c).toUpperCase().charAt(0);
@@ -410,7 +443,7 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 	public void setCord() {
 		Color px = new Color(255,255,0);
 		Color px1 = new Color(255,255,64);
-		b = new boolean[]{rb.getPixelColor(705, 763).equals(px1), rb.getPixelColor(876, 756).equals(px), rb.getPixelColor(1077, 757).equals(px), rb.getPixelColor(1176, 757).equals(px)};
+		b = new boolean[]{rb.getPixelColor(spots[0], spots[1]).equals(px1), rb.getPixelColor(spots[2], spots[3]).equals(px), rb.getPixelColor(spots[4], spots[5]).equals(px), rb.getPixelColor(spots[6], spots[7]).equals(px)};
 	}
 
 	public void fixPos() {
@@ -519,20 +552,20 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 					y = 0;
 				} else if(x == 2 && y == 4) {
 					me = false;
-					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0) && !hmap.get(attack).equalsIgnoreCase(spare)) attack++;
 					delay++;
+					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0) && !hmap.get(attack).equalsIgnoreCase(spare)) attack++;
 					x = 2;
 					y = 0;
 				} else if((x < 8 && x > 3) && (y < 4 && y > 1)) {
 					me = false;
-					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0) && !hmap.get(attack).equalsIgnoreCase(spare)) attack++;
 					foodRemove();
+					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0) && !hmap.get(attack).equalsIgnoreCase(spare)) attack++;
 					x = 4;
 					y = 0;
 				} else if(x == 9 && y == 2) {
 					me = false;
-					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0)) attack++;
 					delay++;
+					if(!(hmap.get(attack).equalsIgnoreCase(rand) && delay > 0)) attack++;
 					x = 9;
 					y = 0;
 				}
@@ -547,9 +580,7 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 				}
 			}
 			menu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(SansTrack.class.getResource("/Menu/" + s[x][y] + ".png"))));
-		}
-
-		if(arg0.getKeyCode() == NativeKeyEvent.VC_M && !keys.contains("M")) {
+		} else if(arg0.getKeyCode() == NativeKeyEvent.VC_M && !keys.contains("M")) {
 			keys.add("M");
 			if(DebugMode == 1) System.out.println("M");
 			x = 0;
@@ -561,6 +592,11 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 			me = false;
 			atc.setText(hmap.get(attack));
 			menu.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(SansTrack.class.getResource("/Menu/" + s[x][y] + ".png"))));
+		} else if(arg0.getKeyCode() == NativeKeyEvent.VC_N && !keys.contains("N")) {
+			keys.add("N");
+			if(DebugMode == 1) System.out.println("N");
+			setSpots = 1;
+			if(DebugMode == 4 || DebugMode == 1) System.out.println("Started spot setting!");
 		} else if(!atc.getText().equalsIgnoreCase(hmap.get(attack))) {
 			new Thread() {
 				public void run() {
@@ -595,6 +631,8 @@ public class SansTrack implements NativeMouseInputListener, WindowListener, Nati
 			keys.remove("X");
 		} else if(arg0.getKeyCode() == NativeKeyEvent.VC_M && keys.contains("M")) {
 			keys.remove("M");
+		} else if(arg0.getKeyCode() == NativeKeyEvent.VC_N && keys.contains("N")) {
+			keys.remove("N");
 		}
 	}
 
